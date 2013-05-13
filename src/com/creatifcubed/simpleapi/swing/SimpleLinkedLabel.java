@@ -28,18 +28,7 @@ public class SimpleLinkedLabel extends JEditorPane {
 		this.setBackground(new Color(0, 0, 0, 0));
 		this.setToolTipText(link);
 
-		this.addHyperlinkListener(new HyperlinkListener() {
-			@Override
-			public void hyperlinkUpdate(HyperlinkEvent e) {
-				if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-					try {
-						Desktop.getDesktop().browse(e.getURL().toURI());
-					} catch (Exception ignore) {
-						JOptionPane.showMessageDialog(null, "Open link: " + e.getURL().toString());
-					}
-				}
-			}
-		});
+		this.addHyperlinkListener(SimpleSwingUtils.createHyperlinkListenerOpen("Unable to open link \"%s\" (reason: {%s})"));
 
 		this.addMouseListener(new MouseAdapter() {
 			@Override

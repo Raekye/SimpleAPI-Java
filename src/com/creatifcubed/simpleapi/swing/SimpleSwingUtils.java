@@ -1,14 +1,24 @@
 package com.creatifcubed.simpleapi.swing;
 
 import java.awt.Color;
+import java.awt.Desktop;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.net.URL;
 
 import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.text.JTextComponent;
+
+import com.creatifcubed.simpleapi.SimpleResources;
 
 public class SimpleSwingUtils {
 	private SimpleSwingUtils() {
@@ -44,29 +54,66 @@ public class SimpleSwingUtils {
 		return textComponent;
 	}
 	
-	private static class AutoscrollListener implements DocumentListener {
+	public static <T extends JTextComponent> T scrollToEnd(T textComponent) {
+		textComponent.setCaretPosition(textComponent.getDocument().getLength());
+		return textComponent;
+	}
+	
+	public static HyperlinkListener createHyperlinkListenerOpen(String msg) {
+		return new HyperlinkListenerOpen(msg);
+	}
+	
+	public static void setIcon(JFrame frame, String path) {
+		URL iconURL = SimpleResources.loadAsURL(path);
+		Toolkit kit = Toolkit.getDefaultToolkit();
+		Image img = kit.createImage(iconURL);
+		frame.setIconImage(img);
+	}
+	
+	public static class HyperlinkListenerOpen implements HyperlinkListener {
+		private final String errorMsg;
+		public HyperlinkListenerOpen(String errorMsg) {
+			this.errorMsg = errorMsg;
+		}
+		
+		@Override
+		public void hyperlinkUpdate(HyperlinkEvent e) {
+			if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+				try {
+					Desktop.getDesktop().browse(e.getURL().toURI());
+				} catch (Exception ignore) {
+					if (this.errorMsg == null) {
+						return;
+					}
+					JOptionPane.showMessageDialog(null, String.format(this.errorMsg, e.getURL().toString(), ignore.getMessage()));
+				}
+			}
+		}
+	}
+	
+	public static class AutoscrollListener implements DocumentListener {
 		private final JTextComponent component;
 		public AutoscrollListener(JTextComponent component) {
 			this.component = component;
 		}
 		@Override
 		public void changedUpdate(DocumentEvent event) {
-			this.component.setCaretPosition(event.getDocument().getLength());
+			return;
 		}
 
 		@Override
 		public void insertUpdate(DocumentEvent event) {
-			return;
+			scrollToEnd(this.component);
 		}
 
 		@Override
 		public void removeUpdate(DocumentEvent event) {
-			return;
+			scrollToEnd(this.component);
 		}
 		
 		@Override
 		public int hashCode() {
-			return 0;
+			return this.component.hashCode();
 		}
 		
 		@Override

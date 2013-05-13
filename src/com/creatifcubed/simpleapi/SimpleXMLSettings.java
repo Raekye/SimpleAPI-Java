@@ -11,8 +11,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.creatifcubed.simpleapi.exceptions.SimpleDocException;
-
 public class SimpleXMLSettings implements SimpleISettings {
 	private String path;
 	private SimpleDoc source;
@@ -28,11 +26,13 @@ public class SimpleXMLSettings implements SimpleISettings {
 	public void load(String path) {
 		try {
 			this.source = new SimpleDoc(path);
-		} catch (SimpleDocException ex) {
+		} catch (SimpleException ex) {
 			if (FileNotFoundException.class.isInstance(ex.getCause())) {
 				this.source = new SimpleDoc();
 				Document doc = this.source.getDocument();
 				doc.appendChild(doc.createElement("root"));
+			} else {
+				throw ex;
 			}
 		}
 	}

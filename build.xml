@@ -7,9 +7,6 @@
 	<property name="dist.jarname" value="simpleapi.jar" />
 	<property name="resources.dir" location="resources" />
 
-	<property name="jdk1.6.dir" location="C:/Program Files/Java/jdk1.6.0_39" />
-	<property name="jdk1.6.compiler" location="${jdk1.6.dir}/bin/javac" />
-
 	<target name="clean">
 		<delete dir="${build.dir}" />
 		<delete dir="${dist.dir}" />
@@ -21,7 +18,7 @@
 	</target>
 
 	<target name="compile" depends="clean, prepare">
-		<javac srcdir="${src.dir}" destdir="${build.dir}" executable="${jdk1.6.compiler}" fork="yes" />
+		<javac srcdir="${src.dir}" destdir="${build.dir}" target="1.6" />
 	</target>
 
 	<target name="jar" depends="compile">

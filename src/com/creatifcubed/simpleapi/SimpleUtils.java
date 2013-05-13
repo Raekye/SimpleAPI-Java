@@ -5,13 +5,17 @@
 package com.creatifcubed.simpleapi;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -117,11 +121,11 @@ public class SimpleUtils {
 		return getJarPath(o.getClass());
 	}
 
-	public static File getJarPath(Class c) {
+	public static File getJarPath(Class<?> c) {
 		try {
 			return new File(c.getProtectionDomain().getCodeSource().getLocation().toURI());
 		} catch (URISyntaxException ex) {
-			throw new RuntimeException(ex);
+			throw new SimpleException(ex);
 		}
 	}
 
@@ -132,31 +136,25 @@ public class SimpleUtils {
 			ex.printStackTrace();
 		}
 	}
-	
+
 	public static String vardump(Object o) {
-		return vardump(o, 0);
+		return vardump(o, "\t");
 	}
-	
-	public static String vardump(Object o, int n) {
-		return vardump(o, n, "\t");
-	}
-	
+
 	public static String vardump(Object o, String indentString) {
-		return vardump(o, 0, indentString);
+		return vardump(o, indentString, 0, new HashSet<Integer>(), false);
 	}
-	
-	public static String vardump(Object o, int n, String indentString) {
-		return vardump(o, n, indentString, new HashSet<Integer>(), false);
-	}
-	
-	public static String vardump(Object o, int n, String indentString, Set<Integer> encountered, boolean ignoreFirstIndent) {
+
+	public static String vardump(Object o, String indentString, int n, Set<Integer> encountered,
+			boolean ignoreFirstIndent) {
 		String indent = repeat(indentString, n);
 		String indentPlus = indent + indentString;
 		if (o == null) {
 			return (ignoreFirstIndent ? "" : indent) + "{null}";
 		}
-		if (isPrimitiveWrapper(o)) {
-			return (ignoreFirstIndent ? "" : indent) + "{" + o.getClass().getSimpleName() + ": " + String.valueOf(o) + "}";
+		if (isPrimitiveWrapper(o) || o instanceof String) {
+			return (ignoreFirstIndent ? "" : indent) + "{" + o.getClass().getSimpleName() + ": " + String.valueOf(o)
+					+ "}";
 		}
 		String bin = (ignoreFirstIndent ? "" : indent) + "{";
 		if (o instanceof Object) {
@@ -170,7 +168,8 @@ public class SimpleUtils {
 					bin += indentPlus + "array length: " + arr.length + ",\n";
 					bin += indentPlus + "array values: [\n";
 					for (int i = 0; i < arr.length; i++) {
-						bin += indentPlus + indentString + i + ": " + vardump(arr[i], n + 1, indentString, encountered, true) + ",\n";
+						bin += indentPlus + indentString + i + ": "
+								+ vardump(arr[i], indentString, n + 1, encountered, true) + ",\n";
 					}
 					bin += indentPlus + "],\n";
 				} else {
@@ -180,7 +179,7 @@ public class SimpleUtils {
 						fields[i].setAccessible(true);
 						bin += indentPlus + indentString + fields[i].getName() + ": ";
 						try {
-							bin += vardump(fields[i].get(o), n + 2, indentString, encountered, true);
+							bin += vardump(fields[i].get(o), indentString, n + 2, encountered, true);
 						} catch (IllegalAccessException ex) {
 							bin += "unable to access: " + ex.getMessage();
 						}
@@ -194,14 +193,45 @@ public class SimpleUtils {
 		}
 		return bin + indent + "}";
 	}
-	
+
 	public static String repeat(String str, int n) {
 		return new String(new char[n]).replaceAll("\0", str);
 	}
-	
+
 	public static boolean isPrimitiveWrapper(Object o) {
-		return o instanceof Boolean || o instanceof Character || o instanceof Byte
-				|| o instanceof Short || o instanceof Integer || o instanceof Long
-				|| o instanceof Float || o instanceof Double || o instanceof Void;
+		return o instanceof Boolean || o instanceof Character || o instanceof Byte || o instanceof Short
+				|| o instanceof Integer || o instanceof Long || o instanceof Float || o instanceof Double
+				|| o instanceof Void;
+	}
+	
+	public static Proxy getCurrentHTTPProxy(Proxy defaultProxy) {
+		String proxyHost = System.getProperty("http.proxyHost");
+		String proxyPort = System.getProperty("http.proxyPort");
+		if (proxyHost == null || proxyPort == null) {
+			return defaultProxy;
+		}
+		return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+	}
+
+	public static void copyFile(File sourceFile, File destFile) throws IOException {
+		if (!destFile.exists()) {
+			destFile.createNewFile();
+		}
+
+		FileChannel source = null;
+		FileChannel destination = null;
+
+		try {
+			source = new FileInputStream(sourceFile).getChannel();
+			destination = new FileOutputStream(destFile).getChannel();
+			destination.transferFrom(source, 0, source.size());
+		} finally {
+			if (source != null) {
+				source.close();
+			}
+			if (destination != null) {
+				destination.close();
+			}
+		}
 	}
 }

@@ -13,9 +13,14 @@ import java.io.OutputStream;
  * @author Adrian
  */
 public class SimpleStreams {
+	public static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 
 	public static int pipeStreams(InputStream in, OutputStream out) throws IOException {
-		byte[] buffer = new byte[8 * 1024];
+		return pipeStreams(in ,out , DEFAULT_BUFFER_SIZE);
+	}
+
+	public static int pipeStreams(InputStream in, OutputStream out, int bufferSize) throws IOException {
+		byte[] buffer = new byte[bufferSize];
 		int total = 0;
 
 		while (true) {
@@ -26,7 +31,8 @@ public class SimpleStreams {
 				}
 				out.write(buffer, 0, read);
 				total += read;
-			} catch (Exception ignore) {
+			} catch (IOException ignore) {
+				ignore.printStackTrace();
 				break;
 			}
 		}
@@ -35,16 +41,36 @@ public class SimpleStreams {
 		return total;
 	}
 
-	public static void pipeStreamsConcurrent(final InputStream in, final OutputStream out) {
+	public static void pipeStreamsConcurrently(InputStream in, OutputStream out) {
+		pipeStreamsConcurrently(in, out, DEFAULT_BUFFER_SIZE, null);
+	}
+
+	public static void pipeStreamsConcurrently(InputStream in, OutputStream out, int bufferSize) {
+		pipeStreamsConcurrently(in, out, bufferSize, null);
+	}
+
+	public static void pipeStreamsConcurrently(InputStream in, OutputStream out, PipeStreamDoneListener onDone) {
+		pipeStreamsConcurrently(in, out, DEFAULT_BUFFER_SIZE, onDone);
+	}
+
+	public static void pipeStreamsConcurrently(final InputStream in, final OutputStream out, final int bufferSize, final PipeStreamDoneListener onDone) {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
+				int bytesPiped = 0;
 				try {
-					SimpleStreams.pipeStreams(in, out);
-				} catch (Exception ex) {
+					bytesPiped = SimpleStreams.pipeStreams(in, out, bufferSize);
+				} catch (IOException ex) {
 					ex.printStackTrace();
+				}
+				if (onDone != null) {
+					onDone.onDone(bytesPiped);
 				}
 			}
 		}, "SimpleStreams - Concurrent Stream Pipe").start();
+	}
+
+	public static interface PipeStreamDoneListener {
+		public void onDone(int bytesPiped);
 	}
 }
