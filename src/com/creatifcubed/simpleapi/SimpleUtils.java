@@ -4,9 +4,12 @@
  */
 package com.creatifcubed.simpleapi;
 
+import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
@@ -77,6 +80,20 @@ public class SimpleUtils {
 		FileOutputStream fos = new FileOutputStream(filename);
 		fos.getChannel().transferFrom(rbc, 0, size);
 		fos.close();
+	}
+	
+	public static void filePutContents(File f, String contents) {
+		try {
+			if (!f.exists()) {
+				f.createNewFile();
+			}
+			FileWriter fw = new FileWriter(f.getCanonicalFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(contents);
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static <T> T[] appendArrays(T[] first, T[]... rest) {
@@ -232,6 +249,14 @@ public class SimpleUtils {
 			if (destination != null) {
 				destination.close();
 			}
+		}
+	}
+	
+	public static void closeSilently(Closeable close) {
+		try {
+			close.close();
+		} catch (Exception ignore) {
+			return;
 		}
 	}
 }

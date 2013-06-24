@@ -7,30 +7,34 @@ package com.creatifcubed.simpleapi;
 /**
  * 
  * @author Adrian
+ * - http://semver.org/
  */
 public class SimpleVersion implements Comparable<SimpleVersion> {
-	private int major;
-	private int minor;
-	private int fix;
-	private int[] all;
+	private final int major;
+	private final int minor;
+	private final int patch;
+	private final String prerelease;
+	private final String metadata;
 
 	public SimpleVersion(String verString) {
-		String[] verArray = verString.split("[.]");
+		String[] separateMetadata = verString.split("\\+");
+		String[] separatePrerelease = separateMetadata[0].split("-");
+		String[] verArray = separatePrerelease[0].split("\\.");
 		this.major = Integer.parseInt(verArray[0]);
 		this.minor = Integer.parseInt(verArray[1]);
-		this.fix = Integer.parseInt(verArray[2]);
-		this.all = new int[verArray.length];
-		for (int i = 0; i < verArray.length; i++) {
-			this.all[i] = Integer.parseInt(verArray[i]);
-		}
+		this.patch = Integer.parseInt(verArray[2]);
+		this.prerelease = separatePrerelease.length > 1 ? separatePrerelease[1] : null;
+		this.metadata = separateMetadata.length > 1 ? separateMetadata[1] : null;
 	}
 
 	public boolean shouldUpdateTo(SimpleVersion newerVersion) {
-		return this.shouldUpdateTo(newerVersion, 100);
-	}
-
-	public boolean shouldUpdateTo(SimpleVersion newerVersion, int diff) {
-		return this.compareTo(newerVersion) <= -diff;
+		if (newerVersion.major > this.major) {
+			return true;
+		}
+		if (newerVersion.major == this.major && newerVersion.minor > this.minor) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -38,7 +42,7 @@ public class SimpleVersion implements Comparable<SimpleVersion> {
 		if (o != null) {
 			if (o instanceof SimpleVersion) {
 				SimpleVersion other = (SimpleVersion) o;
-				return this.major == other.major && this.minor == other.minor && this.fix == other.fix;
+				return this.major == other.major && this.minor == other.minor && this.patch == other.patch;
 			}
 		}
 		return false;
@@ -46,7 +50,7 @@ public class SimpleVersion implements Comparable<SimpleVersion> {
 
 	@Override
 	public int hashCode() {
-		return ((this.major * 100) + this.minor) * 100 + this.fix;
+		return ((this.major * 100) + this.minor) * 100 + this.patch;
 	}
 
 	@Override
@@ -56,10 +60,6 @@ public class SimpleVersion implements Comparable<SimpleVersion> {
 
 	@Override
 	public String toString() {
-		String bin = String.valueOf(this.major);
-		for (int i = 1; i < this.all.length; i++) {
-			bin += "." + this.all[i];
-		}
-		return bin;
+		return this.major + "." + this.minor + "." + this.patch + (this.prerelease == null ? "" : "-" + this.prerelease) + (this.metadata == null ? "" : "+" + this.metadata);
 	}
 }

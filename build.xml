@@ -18,7 +18,7 @@
 	</target>
 
 	<target name="compile" depends="clean, prepare">
-		<javac srcdir="${src.dir}" destdir="${build.dir}" target="1.6" />
+		<javac srcdir="${src.dir}" destdir="${build.dir}" target="1.6" source="1.6" excludes="com/creatifcubed/simpleapi/tests/**" />
 	</target>
 
 	<target name="jar" depends="compile">
