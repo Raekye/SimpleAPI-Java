@@ -28,7 +28,7 @@ public class SimpleLinkedLabel extends JEditorPane {
 		this.setBackground(new Color(0, 0, 0, 0));
 		this.setToolTipText(link);
 
-		this.addHyperlinkListener(SimpleSwingUtils.createHyperlinkListenerOpen("Unable to open link \"%s\" (reason: {%s})"));
+		this.addHyperlinkListener(SimpleSwingUtils.createHyperlinkListenerOpen("Unable to open link %s"));
 
 		this.addMouseListener(new MouseAdapter() {
 			@Override

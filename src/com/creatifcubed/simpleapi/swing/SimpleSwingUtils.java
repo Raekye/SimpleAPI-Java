@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import javax.swing.BorderFactory;
@@ -19,6 +20,7 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.text.JTextComponent;
 
 import com.creatifcubed.simpleapi.SimpleResources;
+import com.creatifcubed.simpleapi.SimpleUtils;
 
 public class SimpleSwingUtils {
 	private SimpleSwingUtils() {
@@ -79,14 +81,10 @@ public class SimpleSwingUtils {
 		@Override
 		public void hyperlinkUpdate(HyperlinkEvent e) {
 			if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-				try {
-					Desktop.getDesktop().browse(e.getURL().toURI());
-				} catch (Exception ignore) {
-					if (this.errorMsg == null) {
-						return;
-					}
-					JOptionPane.showMessageDialog(null, String.format(this.errorMsg, e.getURL().toString(), ignore.getMessage()));
+				if (SimpleUtils.openLink(e.getURL())) {
+					return;
 				}
+				JOptionPane.showMessageDialog(null, String.format(this.errorMsg, e.getURL().toString()));
 			}
 		}
 	}

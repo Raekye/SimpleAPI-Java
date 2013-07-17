@@ -2,11 +2,16 @@ package com.creatifcubed.simpleapi.tests;
 
 import static org.junit.Assert.*;
 
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
+
 import org.junit.Test;
 
-import com.creatifcubed.simpleapi.SimpleSwingWaiter;
 import com.creatifcubed.simpleapi.SimpleTask;
 import com.creatifcubed.simpleapi.SimpleWaiter;
+import com.creatifcubed.simpleapi.swing.SimpleSwingWaiter;
 
 public class SimpleWaiterTests {
 
@@ -43,13 +48,13 @@ public class SimpleWaiterTests {
 	@Test
 	public void test2() {
 		final SimpleSwingWaiter waiter = new SimpleSwingWaiter("Test");
+		final Logger log = Logger.getGlobal();
 		waiter.worker = new SimpleSwingWaiter.Worker(waiter) {
 			@Override
 			protected Void doInBackground() throws Exception {
 				int i = 0;
 				while (i < 20) {
-					waiter.stdout().println("I: " + i);
-					System.out.println("I: " + i);
+					log.info("I: " + i);
 					//this.setProgress((int) (i / 20.0 * 100));
 					try {
 						Thread.sleep(50);
@@ -70,6 +75,19 @@ public class SimpleWaiterTests {
 				return false;
 			}
 		};
+		log.addHandler(new StreamHandler(System.out, new SimpleFormatter()) {
+			@Override
+			public void flush() {
+				System.err.println("Flush called");
+				super.flush();
+			}
+			@Override
+			public void publish(LogRecord log) {
+				System.err.println("Publishing");
+				super.publish(log);
+				super.flush();
+			}
+		});
 		waiter.run();
 	}
 

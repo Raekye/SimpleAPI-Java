@@ -1,4 +1,4 @@
-package com.creatifcubed.simpleapi;
+package com.creatifcubed.simpleapi.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -12,6 +12,7 @@ import java.beans.PropertyChangeListener;
 import java.io.PrintStream;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
@@ -23,7 +24,6 @@ import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
-import com.creatifcubed.simpleapi.swing.SimpleGUIConsole;
 
 public class SimpleSwingWaiter implements Runnable {
 	public String title;
@@ -83,14 +83,23 @@ public class SimpleSwingWaiter implements Runnable {
 		});
 
 		JPanel panel = new JPanel(new BorderLayout());
-		JEditorPane consoleField = this.console.getOutputField();
+		final JEditorPane consoleField = this.console.getOutputField();
+		SimpleSwingUtils.setAutoscroll(consoleField, true);
 		JPanel topPanel = new JPanel(new BorderLayout());
 		final JProgressBar progress = new JProgressBar();
 		progress.setIndeterminate(this.worker.isIndeterminate());
+		final JCheckBox autoscroll = new JCheckBox("Autoscroll", true);
+		autoscroll.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				SimpleSwingUtils.setAutoscroll(consoleField, autoscroll.isSelected());
+			}
+		});
 
 		topPanel.add(progress, BorderLayout.CENTER);
 		panel.add(topPanel, BorderLayout.NORTH);
 		panel.add(new JScrollPane(consoleField), BorderLayout.CENTER);
+		panel.add(autoscroll, BorderLayout.SOUTH);
 		
 		if (this.worker.isCancellable()) {
 			JButton cancel = new JButton("Cancel");

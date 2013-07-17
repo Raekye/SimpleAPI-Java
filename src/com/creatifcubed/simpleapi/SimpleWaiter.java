@@ -22,6 +22,7 @@ import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
 import com.creatifcubed.simpleapi.swing.SimpleGUIConsole;
+import com.creatifcubed.simpleapi.swing.SimpleSwingUtils;
 
 /**
  * 
@@ -62,6 +63,7 @@ public class SimpleWaiter implements Runnable {
 		JPanel panel = new JPanel(new BorderLayout());
 		final JProgressBar progress = new JProgressBar(0, SimpleTask.PROGRESS_MAX);
 		progress.setIndeterminate(this.task.getProgress() == -1);
+		SimpleSwingUtils.setAutoscroll(this.console.getOutputField(), true);
 		
 		panel.add(progress, BorderLayout.NORTH);
 		panel.add(new JScrollPane(this.console.getOutputField()));

@@ -4,15 +4,19 @@
  */
 package com.creatifcubed.simpleapi;
 
+import java.awt.Desktop;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -20,8 +24,11 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -29,6 +36,7 @@ import java.util.Set;
  * @author Adrian
  */
 public class SimpleUtils {
+	public static final Charset DEFAULT_ENCODING = Charset.forName("utf-8");
 	private SimpleUtils() {
 		//
 	}
@@ -54,6 +62,7 @@ public class SimpleUtils {
 		case UNIX:
 			fileExplorer = "nautilus";
 			break;
+		case UNKNOWN:
 		}
 		return fileExplorer;
 	}
@@ -81,19 +90,42 @@ public class SimpleUtils {
 		fos.getChannel().transferFrom(rbc, 0, size);
 		fos.close();
 	}
-	
+
 	public static void filePutContents(File f, String contents) {
+		filePutContents(f, contents, DEFAULT_ENCODING);
+	}
+	public static void filePutContents(File f, String contents, Charset encoding) {
 		try {
 			if (!f.exists()) {
 				f.createNewFile();
 			}
-			FileWriter fw = new FileWriter(f.getCanonicalFile());
-			BufferedWriter bw = new BufferedWriter(fw);
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f.getCanonicalFile()), encoding));
 			bw.write(contents);
 			bw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	public static String fileGetContents(File f) {
+		return fileGetContents(f, DEFAULT_ENCODING);
+	}
+	public static String fileGetContents(File f, Charset encoding) {
+		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f), encoding));
+			String nl = System.getProperty("line.separator");
+			String bin = "";
+			while (true) {
+				String line = reader.readLine();
+				if (line == null) {
+					break;
+				}
+				bin += line;
+			}
+			return bin;
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+		return null;
 	}
 
 	public static <T> T[] appendArrays(T[] first, T[]... rest) {
@@ -111,13 +143,28 @@ public class SimpleUtils {
 
 		return all;
 	}
+	
+	public static <T> List<T> listFromArray(T[] arr) {
+		List<T> list = new LinkedList<T>();
+		for (int i = 0; i < arr.length; i++) {
+			list.add(arr[i]);
+		}
+		return list;
+	}
 
 	public static boolean httpPing(String server) {
+		try {
+			URL url = new URL(server);
+			server = url.getHost();
+		} catch (MalformedURLException ignore) {
+			//
+		}
 		Socket socket = null;
 		try {
 			socket = new Socket(server, 80);
 			return true;
 		} catch (IOException ex) {
+			ex.printStackTrace();
 			return false;
 		} finally {
 			if (socket != null) {
@@ -220,7 +267,7 @@ public class SimpleUtils {
 				|| o instanceof Integer || o instanceof Long || o instanceof Float || o instanceof Double
 				|| o instanceof Void;
 	}
-	
+
 	public static Proxy getCurrentHTTPProxy(Proxy defaultProxy) {
 		String proxyHost = System.getProperty("http.proxyHost");
 		String proxyPort = System.getProperty("http.proxyPort");
@@ -231,32 +278,78 @@ public class SimpleUtils {
 	}
 
 	public static void copyFile(File sourceFile, File destFile) throws IOException {
-		if (!destFile.exists()) {
-			destFile.createNewFile();
-		}
-
-		FileChannel source = null;
-		FileChannel destination = null;
-
-		try {
-			source = new FileInputStream(sourceFile).getChannel();
-			destination = new FileOutputStream(destFile).getChannel();
-			destination.transferFrom(source, 0, source.size());
-		} finally {
-			if (source != null) {
-				source.close();
+		if (sourceFile.isDirectory()) {
+			destFile.mkdir();
+			File[] sourceChildren = sourceFile.listFiles();
+			for (int i = 0; i < sourceChildren.length; i++) {
+				copyFile(sourceChildren[i], new File(destFile, sourceChildren[i].getName()));
 			}
-			if (destination != null) {
-				destination.close();
+		} else {
+			destFile.createNewFile();
+			FileChannel source = null;
+			FileChannel destination = null;
+	
+			try {
+				source = new FileInputStream(sourceFile).getChannel();
+				destination = new FileOutputStream(destFile).getChannel();
+				destination.transferFrom(source, 0, source.size());
+			} finally {
+				if (source != null) {
+					source.close();
+				}
+				if (destination != null) {
+					destination.close();
+				}
 			}
 		}
 	}
-	
+
 	public static void closeSilently(Closeable close) {
 		try {
 			close.close();
 		} catch (Exception ignore) {
 			return;
 		}
+	}
+
+	public static boolean openLink(String url) {
+		try {
+			return openLink(new URL(url));
+		} catch (MalformedURLException ignore) {
+			ignore.printStackTrace();
+		}
+		return false;
+	}
+	public static boolean openLink(URL url) {
+		try {
+			Desktop.getDesktop().browse(url.toURI());
+			return true;
+		} catch (IOException ignore) {
+			ignore.printStackTrace();
+		} catch (URISyntaxException ignore) {
+			ignore.printStackTrace();
+		}
+		return false;
+	}
+
+	public static String implode(String join, List<String> list) {
+		return implode(join, list.toArray(new String[list.size()]));
+	}
+	public static String implode(String join, String[] arr) {
+		if (arr.length == 0) {
+			return "";
+		}
+		String bin = arr[0];
+		for (int i = 1; i < arr.length; i++) {
+			bin += join + arr[i];
+		}
+		return bin;
+	}
+	public static <T> T[] reverseArray(T[] arr) {
+		T[] copy = Arrays.copyOf(arr, arr.length);
+		for (int i = 0; i < copy.length / 2; i++) {
+			copy[i] = copy[copy.length - (i + 1)];
+		}
+		return copy;
 	}
 }
