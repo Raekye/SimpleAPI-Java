@@ -50,36 +50,6 @@ public class SimpleUtils {
 		}
 	}
 
-	public static String getOSFileExplorer() {
-		String fileExplorer = null;
-		switch (SimpleOS.getOS()) {
-		case WINDOWS:
-			fileExplorer = "explorer";
-			break;
-		case MAC:
-			fileExplorer = "open";
-			break;
-		case UNIX:
-			fileExplorer = "nautilus";
-			break;
-		case UNKNOWN:
-		}
-		return fileExplorer;
-	}
-
-	public static boolean openFolder(String explorer, String path) {
-		ProcessBuilder pb = new ProcessBuilder(explorer, path);
-		try {
-			Process p = pb.start();
-			if (p == null) {
-				throw new NullPointerException("Starting process (open folder) was null");
-			}
-		} catch (Exception ex) {
-			return false;
-		}
-		return true;
-	}
-
 	public static int constrain(int num, int min, int max) {
 		return Math.max(Math.min(num, max), min);
 	}
@@ -142,14 +112,6 @@ public class SimpleUtils {
 		}
 
 		return all;
-	}
-	
-	public static <T> List<T> listFromArray(T[] arr) {
-		List<T> list = new LinkedList<T>();
-		for (int i = 0; i < arr.length; i++) {
-			list.add(arr[i]);
-		}
-		return list;
 	}
 
 	public static boolean httpPing(String server) {

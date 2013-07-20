@@ -9,7 +9,7 @@ package com.creatifcubed.simpleapi;
  * @author Adrian
  */
 public enum SimpleOS {
-	WINDOWS("Windows"), MAC("Mac"), UNIX("Unix (like)"), UNKNOWN("Unknown");
+	UNIX("Unix (like)"), MAC("Mac"), WINDOWS("Windows"), UNKNOWN("Unknown");
 
 	public final String representation;
 
