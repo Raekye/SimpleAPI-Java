@@ -54,7 +54,7 @@ public class SimpleUtils {
 		return Math.max(Math.min(num, max), min);
 	}
 
-	public static void downloadFile(URL url, String filename, int size) throws IOException {
+	public static void downloadFile(URL url, File filename, int size) throws IOException {
 		ReadableByteChannel rbc = Channels.newChannel(url.openStream());
 		FileOutputStream fos = new FileOutputStream(filename);
 		fos.getChannel().transferFrom(rbc, 0, size);

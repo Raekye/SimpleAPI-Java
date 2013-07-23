@@ -40,6 +40,7 @@ public class SimpleHTTPRequest {
 		this.postBody = null;
 		this.headers = new HashMap<String, String>();
 		this.connection = null;
+		this.encoding = DEFAULT_ENCODING;
 		this.requestMade = false;
 	}
 	/**
@@ -315,6 +316,11 @@ public class SimpleHTTPRequest {
 		} finally {
 			this.requestMade = true;
 		}
+	}
+	
+	public synchronized SimpleHTTPRequest resetConnection() {
+		this.requestMade = true;
+		return this;
 	}
 	
 	/**
