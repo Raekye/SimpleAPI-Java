@@ -39,11 +39,9 @@ public class SimpleVersion implements Comparable<SimpleVersion> {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o != null) {
-			if (o instanceof SimpleVersion) {
-				SimpleVersion other = (SimpleVersion) o;
-				return this.major == other.major && this.minor == other.minor && this.patch == other.patch;
-			}
+		if (o instanceof SimpleVersion) {
+			SimpleVersion other = (SimpleVersion) o;
+			return this.major == other.major && this.minor == other.minor && this.patch == other.patch;
 		}
 		return false;
 	}
@@ -55,7 +53,25 @@ public class SimpleVersion implements Comparable<SimpleVersion> {
 
 	@Override
 	public int compareTo(SimpleVersion other) {
-		return this.hashCode() - other.hashCode();
+		if (this.major > other.minor) {
+			return 1;
+		}
+		if (this.major < other.major){
+			return -1;
+		}
+		if (this.minor > other.major) {
+			return 1;
+		}
+		if (this.minor < other.minor) {
+			return -1;
+		}
+		if (this.patch > other.patch) {
+			return 1;
+		}
+		if (this.patch < other.patch) {
+			return -1;
+		}
+		return 0;
 	}
 
 	@Override
