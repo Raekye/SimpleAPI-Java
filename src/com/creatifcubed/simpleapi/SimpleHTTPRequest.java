@@ -78,14 +78,13 @@ public class SimpleHTTPRequest {
 	 * @throws IllegalArgumentException if url is not http or invalid
 	 */
 	public SimpleHTTPRequest setURL(String url) {
-		if (url == null) {
-			throw new NullPointerException("Parameter 0 (String url) is null");
-		}
-		if (!url.startsWith("http")) {
-			throw new IllegalArgumentException("URL must be http, was {" + url + "}");
-		}
-		if (!isValidURL(url)) {
-			throw new IllegalArgumentException("Invalid URL, got {" + url + "}");
+		if (url != null) {
+			if (!url.startsWith("http")) {
+				throw new IllegalArgumentException("URL must be http, was {" + url + "}");
+			}
+			if (!isValidURL(url)) {
+				throw new IllegalArgumentException("Invalid URL, got {" + url + "}");
+			}
 		}
 		this.url = url;
 		return this;
