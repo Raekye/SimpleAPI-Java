@@ -61,32 +61,11 @@ public class SimpleSwingUtils {
 		return textComponent;
 	}
 	
-	public static HyperlinkListener createHyperlinkListenerOpen(String msg) {
-		return new HyperlinkListenerOpen(msg);
-	}
-	
 	public static void setIcon(JFrame frame, String path) {
 		URL iconURL = SimpleResources.loadAsURL(path);
 		Toolkit kit = Toolkit.getDefaultToolkit();
 		Image img = kit.createImage(iconURL);
 		frame.setIconImage(img);
-	}
-	
-	public static class HyperlinkListenerOpen implements HyperlinkListener {
-		private final String errorMsg;
-		public HyperlinkListenerOpen(String errorMsg) {
-			this.errorMsg = errorMsg;
-		}
-		
-		@Override
-		public void hyperlinkUpdate(HyperlinkEvent e) {
-			if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-				if (SimpleUtils.openLink(e.getURL())) {
-					return;
-				}
-				JOptionPane.showMessageDialog(null, String.format(this.errorMsg, e.getURL().toString()));
-			}
-		}
 	}
 	
 	public static class AutoscrollListener implements DocumentListener {

@@ -19,7 +19,7 @@ import javax.swing.event.HyperlinkListener;
 public class SimpleLinkableLabel extends JEditorPane {
 
 	public SimpleLinkableLabel() {
-		this.addHyperlinkListener(SimpleSwingUtils.createHyperlinkListenerOpen("Unable to open link %s"));
+		this.addHyperlinkListener(new SimpleHyperlinkListener("Unable to open link %s"));
 		this.setContentType("text/html");
 		this.setEditable(false);
 		this.setBackground(new Color(0, 0, 0, 0));
