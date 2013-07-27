@@ -127,7 +127,7 @@ public class SimpleHTTPRequest {
 	 * @return this 
 	 */
 	public SimpleHTTPRequest addPost(String key, String value) {
-		this.postQuery += (this.getQuery.isEmpty() ? "" : "&") + this.encodeURLComponent(key) + "="
+		this.postQuery += (this.postQuery.isEmpty() ? "" : "&") + this.encodeURLComponent(key) + "="
 				+ this.encodeURLComponent(value);
 		return this;
 	}
@@ -298,7 +298,7 @@ public class SimpleHTTPRequest {
 			String postBody = this.getPostBody();
 			String content = postBody == null ? this.getPostData() : postBody;
 			byte[] data = content.getBytes(this.getEncoding());
-			connection.setRequestProperty("Content-length", Integer.toString(data.length));
+			connection.setRequestProperty("Content-Length", Integer.toString(data.length));
 			connection.getOutputStream().write(data);
 			BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
