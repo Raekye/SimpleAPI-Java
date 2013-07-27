@@ -10,16 +10,22 @@ package com.creatifcubed.simpleapi;
  * - http://semver.org/
  */
 public class SimpleVersion implements Comparable<SimpleVersion> {
-	private final int major;
-	private final int minor;
-	private final int patch;
-	private final String prerelease;
-	private final String metadata;
+	public final int major;
+	public final int minor;
+	public final int patch;
+	public final String prerelease;
+	public final String metadata;
 
 	public SimpleVersion(String verString) {
+		if (verString == null) {
+			throw new NullPointerException("Parameter 0 (String verString) is null");
+		}
 		String[] separateMetadata = verString.split("\\+");
 		String[] separatePrerelease = separateMetadata[0].split("-");
 		String[] verArray = separatePrerelease[0].split("\\.");
+		if (verArray.length != 3) {
+			throw new IllegalArgumentException(String.format("Version string is not major.minor.patch (is {%s})", verString));
+		}
 		this.major = Integer.parseInt(verArray[0]);
 		this.minor = Integer.parseInt(verArray[1]);
 		this.patch = Integer.parseInt(verArray[2]);
@@ -48,7 +54,7 @@ public class SimpleVersion implements Comparable<SimpleVersion> {
 
 	@Override
 	public int hashCode() {
-		return ((this.major * 100) + this.minor) * 100 + this.patch;
+		return ((this.major * 128) + this.minor) * 128 + this.patch;
 	}
 
 	@Override
