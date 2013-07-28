@@ -62,9 +62,10 @@ public class SimpleStreams {
 					bytesPiped = SimpleStreams.pipeStreams(in, out, bufferSize);
 				} catch (IOException ex) {
 					ex.printStackTrace();
-				}
-				if (onDone != null) {
-					onDone.onDone(bytesPiped);
+				} finally {
+					if (onDone != null) {
+						onDone.onDone(bytesPiped);
+					}
 				}
 			}
 		}, "SimpleStreams - Concurrent Stream Pipe").start();
