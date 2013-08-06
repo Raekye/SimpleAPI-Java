@@ -59,13 +59,13 @@ public class SimpleVersion implements Comparable<SimpleVersion> {
 
 	@Override
 	public int compareTo(SimpleVersion other) {
-		if (this.major > other.minor) {
+		if (this.major > other.major) {
 			return 1;
 		}
 		if (this.major < other.major){
 			return -1;
 		}
-		if (this.minor > other.major) {
+		if (this.minor > other.minor) {
 			return 1;
 		}
 		if (this.minor < other.minor) {
